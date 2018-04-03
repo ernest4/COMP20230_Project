@@ -1,25 +1,23 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+'''
+Created on 3 Apr 2018
 
-"""Tests for `ernestas_monkevicius_14493758_project` package."""
+@author: ernest
+'''
+import unittest
+from ernestas_monkevicius_14493758_project import data_structures
 
-import pytest
-
-
-from ernestas_monkevicius_14493758_project import ernestas_monkevicius_14493758_project
-
-
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
-
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
+#EXAMPLE TESTING
+class Test(unittest.TestCase):
+        
+    #def test_invalid1(self):
+    #    t = Triangle(1, 2, 4)
+    #    self.assertTrue(t.classify() == "INVALID")
+        
+    def test_Currency(self):
+        currency = data_structures.Currency()
+        #Logic here...
+        self.assertTrue(True, "Success!!")
+        
+        
+if __name__ == '__main__':
+    unittest.main()

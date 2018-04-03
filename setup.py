@@ -54,4 +54,5 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     setup_requires=setup_requirements,
+    entry_points={'console_scripts':['comp20230_project=ernestas_monkevicius_14493758_project.ernestas_monkevicius_14493758_project:main']}
 )
