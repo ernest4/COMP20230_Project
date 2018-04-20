@@ -24,7 +24,7 @@ def main(argv=None):
     opts, args = parser.parse_args(argv)
     #argument error handling
     if opts.inputFile is None:
-        parser.error("Inputs required. For more help use -h or --help.")
+        parser.error("Argument [-i input_file] required. For more help use -h or --help.")
         
         
         

@@ -4,40 +4,101 @@ Created on 3 Apr 2018
 @author: ernest
 '''
 
+import pandas as pd
+import numpy as np
+from ernestas_monkevicius_14493758_project.utility import cleanUp
+
 class Aircraft:
     '''
-    classdocs
+    Stores aircraft codes and ranges.
     '''
 
-    def __init__(self):
+    def __init__(self, file):
         '''
-        Constructor
+        Takes in a file and creates a list of [aircraft, range] lists.
         '''
-        pass
+        try:
+            self.__df_aircraft = pd.read_csv(file, skipinitialspace=True)
+        except IOError as e:
+            print(e)
+            
+        self.__df_aircraft = self.__df_aircraft[['code', 'units', 'range']]
+        self.__df_aircraft.loc[self.__df_aircraft['units'] == 'imperial', 'range'] *= 1.60934 #1.60934 is miles to kilometers
+        self.__df_aircraft = self.__df_aircraft.drop('units', 1)
+        self.__df_aircraft = cleanUp(self.__df_aircraft)
+        self.__df_aircraft = self.__df_aircraft.values.tolist()
     
-
+    @property
+    def aircraft(self):
+        return self.__df_aircraft
 
 class Airport:
     '''
-    classdocs
+    Stores airport countries, codes and coordinates.
     '''
 
-    def __init__(self):
+    def __init__(self, file):
         '''
-        Constructor
+        Takes in a file and creates a list of [country, code, latitude, longitude] lists.
         '''
-        pass
-    
+        try:
+            self.__df_airport = pd.read_csv(file, skipinitialspace=True, header=None, names=[0,1,2,'country', 'IATA', 'ICAO','N_lat','E_lon',8,9,10,11])
+        except IOError as e:
+            print(e)
+            
+        self.__df_airport = self.__df_airport[['country', 'IATA','N_lat','E_lon']]
+        self.__df_airport = cleanUp(self.__df_airport)
+        
+    def getAirports(self, codes):
+        codes = [c.upper() for c in codes]
+        airports = []
+        
+        for code in codes:
+            try:
+                airports.append(self.__df_airport.loc[self.__df_airport['IATA'] == code].values.tolist()[0])
+            except Exception as e:
+                airports.append(None)
+                
+        return airports
 
 
 class Currency:
     '''
-    classdocs
+    Stores country names, their currency codes and exchange rates.
     '''
 
-    def __init__(self):
+    def __init__(self, countryCurrencyFile, currencyRatesFile):
         '''
-        Constructor
+        Takes in a countryCurrencyFile and creates a list of [currency_alphabetic_code, currency_country_name] lists.
+        Takes in a currencyRatesFile and creates a list of [currency_alphabetic_code, toEuro] lists.
         '''
-        pass
+        try:
+            self.__df_countrycurrency = pd.read_csv(countryCurrencyFile, skipinitialspace=True)
+            self.__df_currencyrates = pd.read_csv(currencyRatesFile, skipinitialspace=True, header=None, names=['name', 'currency_alphabetic_code', 'toEuro', 'fromEuro'])
+        except IOError as e:
+            print(e)
+            
+        self.__df_countrycurrency = self.__df_countrycurrency[self.__df_countrycurrency.columns[14:16]]
+        self.__df_countrycurrency = cleanUp(self.__df_countrycurrency)
+        
+        self.__df_currencyrates = self.__df_currencyrates[self.__df_currencyrates.columns[1:3]]
+        self.__df_currencyrates = cleanUp(self.__df_currencyrates)
+    
+    def getExchangeRate(self, countryName):
+        countryName = countryName.upper()
+        try:
+            code = self.__df_countrycurrency.loc[self.__df_countrycurrency['currency_country_name'] == countryName].values.tolist()[0][0]
+            return self.__df_currencyrates.loc[self.__df_currencyrates['currency_alphabetic_code'] == code].values.tolist()[0][1]
+        except Exception as e:
+            return None
+        
+class InputRoutes:
+    '''
+    Stores the test routes.
+    '''
+    
+    def __init__(self, file):
+        '''
+        Takes in a file and creates a list of input route lists.
+        '''
     

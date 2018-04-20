@@ -6,6 +6,10 @@ Created on 3 Apr 2018
 import unittest
 from ernestas_monkevicius_14493758_project import data_structures
 from ernestas_monkevicius_14493758_project import utility
+import pandas as pd
+import numpy as np
+from ernestas_monkevicius_14493758_project.data_structures import Aircraft, Airport, Currency,\
+    InputRoutes
 
 class Test(unittest.TestCase):
     
@@ -39,7 +43,7 @@ class Test(unittest.TestCase):
         
         
     airportList = {
-    'DUB' : ['Dublin', 'Ireland', (53.421333, -6.270075)],
+    'DUB' : ['Dublin', 'Ireland', [53.421333, -6.270075]],
     'LHR' : ['Heathrow', 'United Kingdom', (51.4775, -0.461389)],
     'JFK' : ['John F Kennedy Intl', 'United States', (40.639751, -73.778925)],
     'AAL' : ['Aalborg', 'Denmark', (57.092789, 9.849164)],
@@ -53,6 +57,59 @@ class Test(unittest.TestCase):
         for airport in self.airportList:
             answerList.append([airport, utility.getDistanceBetweenAirports(self.airportList, firstAirport, airport)])
         self.assertTrue(answerList == [['DUB', 0], ['LHR', 449], ['JFK', 5103], ['AAL', 1097], ['CDG', 785], ['SYD', 17215]])
+    
+    def test_cleanUp(self):
+        df = pd.DataFrame(data={'col1' : [1,2,3,np.nan,5], 'col2' : [1,np.nan,3,4,5]})
+        df = utility.cleanUp(df)
+        self.assertTrue(df.shape == (3,2))
+        
+    def test_aircraft(self):
+        af = Aircraft('testdata/aircraft.csv')
+        self.assertTrue(af.aircraft == [['A319', 3750.0],
+                                             ['A320', 12000.0],
+                                             ['A321', 12000.0],
+                                             ['A330', 13430.0],
+                                             ['737', 9012.304],
+                                             ['747', 15771.532],
+                                             ['757', 11622.65348],
+                                             ['767', 11474.5942],
+                                             ['777', 15610.598],
+                                             ['BAE146', 2909.0],
+                                             ['DC8', 7724.832],
+                                             ['F50', 2055.0],
+                                             ['MD11', 20390.3378],
+                                             ['A400M', 3298.0],
+                                             ['C212', 1811.0],
+                                             ['V22', 2610.34948],
+                                             ['BB1', 1627.04274],
+                                             ['BA10', 1371.15768],
+                                             ['SIS99', 1300.34672],
+                                             ['SAH', 1300.34672]])
+        
+    def test_airport(self):
+        ap = Airport('testdata/airport.csv')
+        self.assertTrue(ap.getAirports(['KBL']) == [['Afghanistan', 'KBL', 34.565853000000004, 69.212328]]) #get the third list
+        self.assertTrue(ap.getAirports(['hEa']) == [['Afghanistan', 'HEA', 34.210017, 62.2283]]) #get the first list, convert code to upper case
+        self.assertTrue(ap.getAirports(['thisCodeDoesntExist']) == [None]) #get None for invalid codes
+        self.assertTrue(ap.getAirports(['HEA','JAa', 'thisCodeDoesntExist', 'KdH', 'mmZ']) == [['Afghanistan', 'HEA', 34.210017, 62.2283],
+                                                                                 ['Afghanistan', 'JAA', 34.399842, 70.498625],
+                                                                                 None,
+                                                                                 ['Afghanistan', 'KDH', 31.505755999999998, 65.847822],
+                                                                                 ['Afghanistan', 'MMZ', 35.930789000000004, 64.760917]]) #get a list of lists
+    
+    def test_currency(self):
+        c = Currency('testdata/countrycurrency.csv', 'testdata/currencyrates.csv')
+        self.assertTrue(c.getExchangeRate('Afghanistan') == 0.016440) #1 Afghani == 0.016440 Euro
+        self.assertTrue(c.getExchangeRate('Albania') == 0.007237) #1 Albanian Lek == 0.007237 Euro
+        self.assertTrue(c.getExchangeRate('thisCountryDoesNotExist') == None) #get None for invalid countries
+        
+    def test_inputRoutes(self):
+        ir = InputRoutes('testdata/testroutes.csv')
+        self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'AAL', '777']) #get the first input route
+        self.assertTrue(ir.next == ['SNN', 'ORK', 'MAN', 'CDG', 'SIN', 'A330']) #get the second input route
+        for _ in range(0, 10): #move down the rows to get to the row of interest...
+            ir.next
+        self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'SIN', '777']) #this row was originally ['DUB', 'lhr', 'SYD', 'JFK', 'SiN', '777']
     
 if __name__ == '__main__':
     unittest.main()

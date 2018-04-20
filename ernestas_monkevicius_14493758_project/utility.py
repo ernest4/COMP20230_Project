@@ -7,7 +7,7 @@ Created on 15 Apr 2018
 import math
 
 class Graph:
-    '''This class models the graph data structure.'''
+    '''Models the graph data structure.'''
     def __init__(self):
         self.__vertices = {}
         
@@ -126,4 +126,8 @@ def getDistanceBetweenAirports(airportList, airportCode1, airportCode2):
     airport2Coord = airportList[airportCode2][2]
     
     return coordDist(airport1Coord, airport2Coord)
+
+def cleanUp(df):
+    '''Drops duplicate rows and rows with NaN values in argument dataframe'''
+    return df.dropna().drop_duplicates()
     
