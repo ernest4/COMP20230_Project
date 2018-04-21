@@ -96,9 +96,25 @@ class InputRoutes:
     '''
     Stores the test routes.
     '''
+    dataframeIndex = -1
     
     def __init__(self, file):
         '''
         Takes in a file and creates a list of input route lists.
         '''
+        try:
+            self.__df_routes = pd.read_csv(file, skipinitialspace=True, header=None,
+                          error_bad_lines=False, names=[x for x in range(0,6)])
+        except Exception as e:
+            print(e)
+            
+        self.__df_routes = self.__df_routes.dropna(subset=[0,1,2,3,4])
+        
+    @property
+    def next(self):
+        self.dataframeIndex += 1
+        return [str(_).upper() for _ in self.__df_routes.iloc[self.dataframeIndex].values.tolist()]
+        
+        
+        
     

@@ -8,8 +8,8 @@ from ernestas_monkevicius_14493758_project import data_structures
 from ernestas_monkevicius_14493758_project import utility
 import pandas as pd
 import numpy as np
-from ernestas_monkevicius_14493758_project.data_structures import Aircraft, Airport, Currency,\
-    InputRoutes
+from numpy import nan
+from ernestas_monkevicius_14493758_project.data_structures import Aircraft, Airport, Currency, InputRoutes
 
 class Test(unittest.TestCase):
     
@@ -107,7 +107,11 @@ class Test(unittest.TestCase):
         ir = InputRoutes('testdata/testroutes.csv')
         self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'AAL', '777']) #get the first input route
         self.assertTrue(ir.next == ['SNN', 'ORK', 'MAN', 'CDG', 'SIN', 'A330']) #get the second input route
-        for _ in range(0, 10): #move down the rows to get to the row of interest...
+        ir.next
+        ir.next
+        ir.next
+        self.assertTrue(ir.next == ['BOS', 'DFW', 'ORD', 'SFO', 'ATL', 'NAN']) #get the fifth input route
+        for _ in range(5, 14): #move down the rows to get to the row of interest...
             ir.next
         self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'SIN', '777']) #this row was originally ['DUB', 'lhr', 'SYD', 'JFK', 'SiN', '777']
     
