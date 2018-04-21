@@ -3,6 +3,7 @@
 import sys
 import optparse
 from ernestas_monkevicius_14493758_project.data_structures import *
+from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
 
 def main(argv=None):
     if argv is None:
@@ -32,7 +33,14 @@ def main(argv=None):
     for opt in optsDict: #Check if input is given, if not, provide default files
         if optsDict[opt] is None:
             optsDict[opt] = filesDict[opt]
-            
+        elif not optsDict[opt].endswith('.csv'):
+            parser.error("Expected .csv file, instead of "+optsDict[opt])
+        
+    #itineraryOptimizer = ItineraryOptimizer(optsDict)
+    
+    #optimizedItineraries = itineraryOptimizer.getItinerary() #return all optimized itineraries
+    #pd.DataFrame(optimizedItineraries).to_csv(optsDict['outputFile']) #Output optimized itineraries to .csv
+    
     print(optsDict) #Testing...
     
 if __name__ == "__main__":

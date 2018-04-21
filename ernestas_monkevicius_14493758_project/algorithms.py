@@ -18,8 +18,8 @@ class ItineraryOptimizer:
         '''
         self.__routes = InputRoutes(files['outputFile'])
         
-    def getItinerary(self, number):
-        '''Returns a desired number of itineraries to be optimized'''
+    def getItinerary(self, number=None):
+        '''Returns a desired number of optimized itineraries, if number=None then return all.'''
         pass
 
 def getDistanceBetweenAirports(airportList, airportCode1, airportCode2):
