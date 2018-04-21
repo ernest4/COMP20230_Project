@@ -10,6 +10,7 @@ from ernestas_monkevicius_14493758_project import algorithms
 import pandas as pd
 import numpy as np
 from ernestas_monkevicius_14493758_project.data_structures import Aircraft, Airport, Currency, InputRoutes
+from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
 
 class Test(unittest.TestCase):
     
@@ -51,11 +52,11 @@ class Test(unittest.TestCase):
     'SYD' : ['Sydney Intl', 'Australia', (-33.946111, 151.177222)]
     }    
     
-    def test_getDistanceBetweenAirports(self):
-        firstAirport = list(self.airportList.keys())[0]
+    def test_coordDist(self):
+        firstAirport = self.airportList['DUB'][2]
         answerList = []
         for airport in self.airportList:
-            answerList.append([airport, algorithms.getDistanceBetweenAirports(self.airportList, firstAirport, airport)])
+            answerList.append([airport, algorithms.coordDist(firstAirport, self.airportList[airport][2])])
         self.assertTrue(answerList == [['DUB', 0], ['LHR', 449], ['JFK', 5103], ['AAL', 1097], ['CDG', 785], ['SYD', 17215]])
     
     def test_cleanUp(self):
@@ -104,7 +105,7 @@ class Test(unittest.TestCase):
         self.assertTrue(c.getExchangeRate('thisCountryDoesNotExist') == None) #get None for invalid countries
         
     def test_inputRoutes(self):
-        ir = InputRoutes('testdata/testroutes.csv')
+        ir = InputRoutes('testdata/testroutesOld.csv')
         self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'AAL', '777']) #get the first input route
         self.assertTrue(ir.next == ['SNN', 'ORK', 'MAN', 'CDG', 'SIN', 'A330']) #get the second input route
         ir.next
@@ -114,7 +115,23 @@ class Test(unittest.TestCase):
         for _ in range(5, 14): #move down the rows to get to the row of interest...
             ir.next
         self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'SIN', '777']) #this row was originally ['DUB', 'lhr', 'SYD', 'JFK', 'SiN', '777']
+        self.assertTrue(ir.size == 17)
     
     
+    filesDict = { 'outputFile' : 'testdata/testBestroutes.csv',
+                  'inputFile' : 'testdata/testroutesNew.csv',
+                  'currencyFile' : 'testdata/currencyrates.csv',
+                  'countryCurrencyFile' : 'testdata/countrycurrency.csv',
+                  'airportsFile' : 'testdata/airport.csv',
+                  'aircraftFile' : 'testdata/aircraft.csv'}
+    
+    def test_itineraryOptimizer(self):
+        io = ItineraryOptimizer(self.filesDict)
+        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [LUP,EKI,YPO,MRV,AGM,LUP,30672.26] or [LUP,AGM,MRV,YPO,EKI,LUP,30672.26]
+        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [MAM,NBX,ERS,BXR,GDN,MAM,47313.41]
+        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [OLA,OLT,MNZ,ELU,EGR,OLA,25842.14] or [OLA,EGR,ELU,MNZ,OLT,OLA,25842.14]
+        self.assertTrue(io.getOptimizedItinerary(3) != None)
+        self.assertTrue(len(io.getOptimizedItinerary()) == 34) 
+        
 if __name__ == '__main__':
     unittest.main()

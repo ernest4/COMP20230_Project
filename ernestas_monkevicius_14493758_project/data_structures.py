@@ -85,6 +85,9 @@ class Airport:
         self.__df_airport = cleanUp(self.__df_airport)
         
     def getAirports(self, codes):
+        if type(codes) != type([]) and type(codes) != type(tuple()):
+            raise Exception('codes argument must be a list')
+        
         codes = [c.upper() for c in codes]
         airports = []
         
@@ -129,7 +132,7 @@ class Currency:
         
 class InputRoutes:
     '''
-    Stores the test routes.
+    Stores the input routes.
     '''
     dataframeIndex = -1
     
@@ -143,12 +146,16 @@ class InputRoutes:
         except Exception as e:
             print(e)
             
-        self.__df_routes = self.__df_routes.dropna(subset=[0,1,2,3,4])
+        self.__df_routes = self.__df_routes.dropna(subset=[0,1,2,3,4]) #Drop any itineraries which do not have 5 values for airports
         
     @property
-    def next(self):
+    def next(self): #Get one itinerary list from the dataframe at a time.
         self.dataframeIndex += 1
         return [str(_).upper() for _ in self.__df_routes.iloc[self.dataframeIndex].values.tolist()]
+    
+    @property
+    def size(self): #Get the total number of itineraries in the dataframe
+        return self.__df_routes.shape[0]
         
         
         

@@ -2,7 +2,7 @@
 
 import sys
 import optparse
-from ernestas_monkevicius_14493758_project.data_structures import *
+import pandas as pd
 from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
 
 def main(argv=None):
@@ -36,12 +36,10 @@ def main(argv=None):
         elif not optsDict[opt].endswith('.csv'):
             parser.error("Expected .csv file, instead of "+optsDict[opt])
         
-    #itineraryOptimizer = ItineraryOptimizer(optsDict)
+    itineraryOptimizer = ItineraryOptimizer(optsDict)
     
-    #optimizedItineraries = itineraryOptimizer.getItinerary() #return all optimized itineraries
+    #optimizedItineraries = itineraryOptimizer.getOptimizedItinerary() #return all optimized itineraries
     #pd.DataFrame(optimizedItineraries).to_csv(optsDict['outputFile']) #Output optimized itineraries to .csv
-    
-    print(optsDict) #Testing...
     
 if __name__ == "__main__":
     main()

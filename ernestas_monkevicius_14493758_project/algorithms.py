@@ -6,26 +6,63 @@ Created on 3 Apr 2018
 
 import math
 from ernestas_monkevicius_14493758_project.data_structures import *
+import itertools
+from scipy.special.basic import perm
 
 class ItineraryOptimizer:
     '''
-    classdocs
+    Takes in itineraries and produces best or approximate best route for the itinerary.
     '''
 
     def __init__(self, files):
         '''
         Constructor
         '''
-        self.__routes = InputRoutes(files['outputFile'])
+        self.__inputRoutes = InputRoutes(files['inputFile'])
+        self.__airports = Airport(files['airportsFile'])
         
-    def getItinerary(self, number=None):
+    def getOptimizedItinerary(self, number=None):
         '''Returns a desired number of optimized itineraries, if number=None then return all.'''
-        pass
-
-def getDistanceBetweenAirports(airportList, airportCode1, airportCode2):
-    """Returns the great circle distance between two airports"""
+        if number is None:
+            number = self.__inputRoutes.size
+            
+        optimizedRoutesList = []
+        try:
+            for i in range(0, number):
+                optimizedRoutesList.append(self.__optimize(self.__inputRoutes.next))
+        except IndexError:
+            return optimizedRoutesList
+        return optimizedRoutesList
     
-    def coordDist(latLong1, latLong2):
+    def __optimize(self, destinationList): #get the optimal route - brute force
+        print(destinationList[0])
+        destinationListPermutations = self.__permute(destinationList)
+        print(destinationListPermutations)
+        #destinationListPermutations = [list for list in destinationListPermutations]
+        for list in destinationListPermutations:
+            list.append(destinationList[0])
+        print(destinationListPermutations)
+        
+        costsList = [self.__cost(perm) for perm in destinationListPermutations]
+        return min(costsList)
+    
+    def __permute(self, destinationList): #generate permutation for the destinations excluding home start airport
+        permutationTuples = itertools.permutations(destinationList[1:5])
+        return list([list(_) for _ in permutationTuples])
+    
+    def __cost(self, destinationPermutation): #calculate the cost of a permutation    
+        airportList = self.__airports.getAirports(destinationPermutation)
+        distanceList = []
+        print(airportList)
+        for i in range(0, len(airportList)):
+            distanceList.append(coordDist(airportList[i][2:5], airportList[i+1][2:5]))
+            print(distanceList)
+            
+        #print(distanceList)
+        return 0
+    
+
+def coordDist(latLong1, latLong2):
         """Returns the great circle distance between two sets of coordinates"""
         lat1 = math.radians(90-latLong1[0])
         long1 = math.radians(latLong1[1])
@@ -36,12 +73,6 @@ def getDistanceBetweenAirports(airportList, airportCode1, airportCode2):
         product2 = math.cos(lat1)*math.cos(lat2)
 
         return round(math.acos(product1+product2)*6371)
-    
-    
-    airport1Coord = airportList[airportCode1][2]
-    airport2Coord = airportList[airportCode2][2]
-    
-    return coordDist(airport1Coord, airport2Coord)
 
 def optimalPath(graph, rootNode, targetNode):
     '''Based on algorithm from Wikipedia: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
