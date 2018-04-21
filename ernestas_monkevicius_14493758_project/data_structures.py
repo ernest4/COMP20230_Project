@@ -5,8 +5,43 @@ Created on 3 Apr 2018
 '''
 
 import pandas as pd
-import numpy as np
 from ernestas_monkevicius_14493758_project.utility import cleanUp
+
+class Graph:
+    '''Models the graph data structure.'''
+    def __init__(self):
+        self.__vertices = {}
+        
+    def setVertex(self, v):
+        if not v in self.getVertices():
+            #create a vertex key with empty adjacency dict
+            self.__vertices[v] = {}
+        else: #Error, vertex v already exists.
+            return -1
+        
+    def setEdge(self, v1, v2, cost=None):
+        #adds 1 or more bidirectional connections with corresponding cost.
+        if cost is None: #Default cost is 1.
+            cost = [1 for _ in range(0, len(v2))]
+        for c, v in enumerate(v2):
+            if v not in self.__vertices[v1]:
+                self.__vertices[v1][v] = int(cost[c])
+                self.__vertices[v][v1] = int(cost[c])
+                
+    def getEdge(self, v1, v2):
+        return self.__vertices[v1][v2]
+            
+    def getNeighbours(self, x):
+        return self.__vertices[x]
+    
+    def getVertices(self):
+        return self.__vertices.keys()
+            
+    def __str__(self):
+        returnStr = ""
+        for v in self.__vertices.keys():
+            returnStr = "\n".join([returnStr,''.join([v,"->",str(self.__vertices[v])])])
+        return returnStr
 
 class Aircraft:
     '''

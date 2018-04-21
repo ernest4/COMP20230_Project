@@ -2,15 +2,11 @@
 
 import sys
 import optparse
+from ernestas_monkevicius_14493758_project.data_structures import *
 
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
-        
-    #argument error handling
-    #if len(argv) < 1 or argv[0] != '--input':
-    #    print("Usage: -i, --input <input.csv>")
-    #    sys.exit(2)
     
     #parsing command line arguments
     parser = optparse.OptionParser(usage="Usage: %prog [-i input_file][-c currency_file][-C country_currency_file][-a airports_file][-A aircraft_file][-o output_file]")
@@ -22,14 +18,22 @@ def main(argv=None):
     parser.add_option('-A', '--aircraft', dest="aircraftFile", help="The input .csv file which contains aircraft. If none is provided a default one will be used, however, this will not be the latest up to date information.")
     
     opts, args = parser.parse_args(argv)
-    #argument error handling
+    #argument handling
     if opts.inputFile is None:
         parser.error("Argument [-i input_file] required. For more help use -h or --help.")
         
-        
-        
+    filesDict = { 'outputFile' : 'bestroutes.csv',
+                  'currencyFile' : 'data/currencyrates.csv',
+                  'countryCurrencyFile' : 'data/countrycurrency.csv',
+                  'airportsFile' : 'data/airport.csv',
+                  'aircraftFile' : 'data/aircraft.csv'}
     
-    print(opts) #Testing...
+    optsDict = vars(opts)
+    for opt in optsDict: #Check if input is given, if not, provide default files
+        if optsDict[opt] is None:
+            optsDict[opt] = filesDict[opt]
+            
+    print(optsDict) #Testing...
     
 if __name__ == "__main__":
     main()

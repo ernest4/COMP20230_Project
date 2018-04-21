@@ -6,15 +6,15 @@ Created on 3 Apr 2018
 import unittest
 from ernestas_monkevicius_14493758_project import data_structures
 from ernestas_monkevicius_14493758_project import utility
+from ernestas_monkevicius_14493758_project import algorithms
 import pandas as pd
 import numpy as np
-from numpy import nan
 from ernestas_monkevicius_14493758_project.data_structures import Aircraft, Airport, Currency, InputRoutes
 
 class Test(unittest.TestCase):
     
     #Creating a test graph. The structure is just like the example in lecture notes.
-    testGraph = utility.Graph()
+    testGraph = data_structures.Graph()
 
     for i in "abcdefghij":
         testGraph.setVertex(i)
@@ -36,10 +36,10 @@ class Test(unittest.TestCase):
         self.assertTrue(self.testGraph.getEdge('a', 'b') == 4)
         
     def test_BFS(self):
-        self.assertTrue(utility.BFS(self.testGraph, 'c') == ['c', 'a', 'd', 'b', 'e', 'j', 'f', 'h', 'i', 'g'])
+        self.assertTrue(algorithms.BFS(self.testGraph, 'c') == ['c', 'a', 'd', 'b', 'e', 'j', 'f', 'h', 'i', 'g'])
     
     def test_OptimalPath(self):
-        self.assertTrue(utility.optimalPath(self.testGraph, 'c', 'g') == ['c', 'a', 'e', 'f', 'g'])
+        self.assertTrue(algorithms.optimalPath(self.testGraph, 'c', 'g') == ['c', 'a', 'e', 'f', 'g'])
         
         
     airportList = {
@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
         firstAirport = list(self.airportList.keys())[0]
         answerList = []
         for airport in self.airportList:
-            answerList.append([airport, utility.getDistanceBetweenAirports(self.airportList, firstAirport, airport)])
+            answerList.append([airport, algorithms.getDistanceBetweenAirports(self.airportList, firstAirport, airport)])
         self.assertTrue(answerList == [['DUB', 0], ['LHR', 449], ['JFK', 5103], ['AAL', 1097], ['CDG', 785], ['SYD', 17215]])
     
     def test_cleanUp(self):
@@ -114,6 +114,7 @@ class Test(unittest.TestCase):
         for _ in range(5, 14): #move down the rows to get to the row of interest...
             ir.next
         self.assertTrue(ir.next == ['DUB', 'LHR', 'SYD', 'JFK', 'SIN', '777']) #this row was originally ['DUB', 'lhr', 'SYD', 'JFK', 'SiN', '777']
+    
     
 if __name__ == '__main__':
     unittest.main()
