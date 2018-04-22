@@ -2,7 +2,6 @@
 
 import sys
 import optparse
-import pandas as pd
 from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
 
 def main(argv=None):

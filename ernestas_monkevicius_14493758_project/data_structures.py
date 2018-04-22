@@ -6,6 +6,7 @@ Created on 3 Apr 2018
 
 import pandas as pd
 from ernestas_monkevicius_14493758_project.utility import cleanUp
+import traceback
 
 class Graph:
     '''Models the graph data structure.'''
@@ -55,17 +56,25 @@ class Aircraft:
         try:
             self.__df_aircraft = pd.read_csv(file, skipinitialspace=True)
         except IOError as e:
-            print(e)
+            traceback.print_exc()
             
         self.__df_aircraft = self.__df_aircraft[['code', 'units', 'range']]
         self.__df_aircraft.loc[self.__df_aircraft['units'] == 'imperial', 'range'] *= 1.60934 #1.60934 is miles to kilometers
         self.__df_aircraft = self.__df_aircraft.drop('units', 1)
         self.__df_aircraft = cleanUp(self.__df_aircraft)
-        self.__df_aircraft = self.__df_aircraft.values.tolist()
     
     @property
     def aircraft(self):
-        return self.__df_aircraft
+        return self.__df_aircraft.values.tolist()
+    
+    def getAircraft(self, code):
+        code = code.upper()
+        print(code)
+        try:
+            return self.__df_aircraft.loc[self.__df_aircraft['code'] == code].values.tolist()[0]
+        except Exception as e:
+            print("Aircraft code:",code,"is not found in input file or is invalid.")
+            return None
 
 class Airport:
     '''
@@ -79,7 +88,7 @@ class Airport:
         try:
             self.__df_airport = pd.read_csv(file, skipinitialspace=True, header=None, names=[0,1,2,'country', 'IATA', 'ICAO','N_lat','E_lon',8,9,10,11])
         except IOError as e:
-            print(e)
+            traceback.print_exc()
             
         self.__df_airport = self.__df_airport[['country', 'IATA','N_lat','E_lon']]
         self.__df_airport = cleanUp(self.__df_airport)
@@ -114,7 +123,7 @@ class Currency:
             self.__df_countrycurrency = pd.read_csv(countryCurrencyFile, skipinitialspace=True)
             self.__df_currencyrates = pd.read_csv(currencyRatesFile, skipinitialspace=True, header=None, names=['name', 'currency_alphabetic_code', 'toEuro', 'fromEuro'])
         except IOError as e:
-            print(e)
+            traceback.print_exc()
             
         self.__df_countrycurrency = self.__df_countrycurrency[self.__df_countrycurrency.columns[14:16]]
         self.__df_countrycurrency = cleanUp(self.__df_countrycurrency)
@@ -144,7 +153,7 @@ class InputRoutes:
             self.__df_routes = pd.read_csv(file, skipinitialspace=True, header=None,
                           error_bad_lines=False, names=[x for x in range(0,6)])
         except Exception as e:
-            print(e)
+            traceback.print_exc()
             
         self.__df_routes = self.__df_routes.dropna(subset=[0,1,2,3,4]) #Drop any itineraries which do not have 5 values for airports
         

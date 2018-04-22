@@ -6,6 +6,8 @@ Created on 3 Apr 2018
 
 import math
 from ernestas_monkevicius_14493758_project.data_structures import *
+import os
+import traceback
 import itertools
 from scipy.special.basic import perm
 
@@ -20,6 +22,7 @@ class ItineraryOptimizer:
         '''
         self.__inputRoutes = InputRoutes(files['inputFile'])
         self.__airports = Airport(files['airportsFile'])
+        self.__aircraft = Aircraft(files['aircraftFile'])
         
     def getOptimizedItinerary(self, number=None):
         '''Returns a desired number of optimized itineraries, if number=None then return all.'''
@@ -30,35 +33,44 @@ class ItineraryOptimizer:
         try:
             for i in range(0, number):
                 optimizedRoutesList.append(self.__optimize(self.__inputRoutes.next))
-        except IndexError:
+                #itinerary = self.__inputRoutes.next
+                #optimizedRoutesList.append(self.__optimize(itinerary))
+        except IndexError: #when EOF is reached
             return optimizedRoutesList
         return optimizedRoutesList
     
     def __optimize(self, destinationList): #get the optimal route - brute force
-        print(destinationList[0])
+        aircraft = self.__aircraft.getAircraft(destinationList[-1])
+        print('optimize: ', aircraft)
+        print('optimize:',destinationList[0])
         destinationListPermutations = self.__permute(destinationList)
-        print(destinationListPermutations)
-        #destinationListPermutations = [list for list in destinationListPermutations]
+        print('optimize:',destinationListPermutations)
         for list in destinationListPermutations:
-            list.append(destinationList[0])
-        print(destinationListPermutations)
+            list.extend([destinationList[0], list[0]]) # [A1,A2,A3,A4] -> [A2,A3,A4,A5,A0,A1]
+        print('optimize:',destinationListPermutations)
         
-        costsList = [self.__cost(perm) for perm in destinationListPermutations]
-        return min(costsList)
+        costsList = [self.__cost(perm, aircraft) for perm in destinationListPermutations] #Find the total cost of each permutation
+        return min(costsList) #Find the smallest costing permutation and return it with it's cost
     
     def __permute(self, destinationList): #generate permutation for the destinations excluding home start airport
-        permutationTuples = itertools.permutations(destinationList[1:5])
-        return list([list(_) for _ in permutationTuples])
+        permutationTuples = itertools.permutations(destinationList[1:5]) #slice the 4 destination airports and permute them
+        return list([list(_) for _ in permutationTuples]) #itertools.permutations() returns tuples, need to make them lists to modify later
     
-    def __cost(self, destinationPermutation): #calculate the cost of a permutation    
-        airportList = self.__airports.getAirports(destinationPermutation)
-        distanceList = []
-        print(airportList)
-        for i in range(0, len(airportList)):
-            distanceList.append(coordDist(airportList[i][2:5], airportList[i+1][2:5]))
-            print(distanceList)
+    def __cost(self, destinationPermutation, aircraft): #calculate the cost of a permutation    
+        print('cost: ', aircraft)
+        airportList = self.__airports.getAirports(destinationPermutation) #get airport information for each of the codes.
+        #e.g. 'OLT' -> ['United States', 'OLT', 32.7552, -117.1995]
+        costList = []
+        print('cost:',airportList)
+        try:
+            for i in range(0, len(airportList)-1):
+                distance = coordDist(airportList[i][2:5], airportList[i+1][2:5])
+                costList.append(distance)
+                #print(costList)
+        except Exception as e:
+            traceback.print_exc()
             
-        #print(distanceList)
+        print('cost:',costList)
         return 0
     
 
