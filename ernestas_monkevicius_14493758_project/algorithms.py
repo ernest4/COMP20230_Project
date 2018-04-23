@@ -23,6 +23,7 @@ class ItineraryOptimizer:
         self.__inputRoutes = InputRoutes(files['inputFile'])
         self.__airports = Airport(files['airportsFile'])
         self.__aircraft = Aircraft(files['aircraftFile'])
+        self.__currency = Currency(files['countryCurrencyFile'], files['currencyFile'])
         
     def getOptimizedItinerary(self, number=None):
         '''Returns a desired number of optimized itineraries, if number=None then return all.'''
@@ -31,47 +32,89 @@ class ItineraryOptimizer:
             
         optimizedRoutesList = []
         try:
-            for i in range(0, number):
+            for _ in range(0, number):
                 optimizedRoutesList.append(self.__optimize(self.__inputRoutes.next))
                 #itinerary = self.__inputRoutes.next
                 #optimizedRoutesList.append(self.__optimize(itinerary))
         except IndexError: #when EOF is reached
+            print('getOptimizedItinerary: IndexError',optimizedRoutesList) #TESTING
             return optimizedRoutesList
+        print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
         return optimizedRoutesList
     
     def __optimize(self, destinationList): #get the optimal route - brute force
+        print("\nOptimizing itinerary:", destinationList)
         aircraft = self.__aircraft.getAircraft(destinationList[-1])
-        print('optimize: ', aircraft)
-        print('optimize:',destinationList[0])
+        if aircraft is None: #No valid aircraft provided means no flight plan made
+            return None
+        homeDestination = destinationList[0]
+        #print('optimize: ',aircraft)
+        #print('optimize:',destinationList[0])
         destinationListPermutations = self.__permute(destinationList)
-        print('optimize:',destinationListPermutations)
-        for list in destinationListPermutations:
-            list.extend([destinationList[0], list[0]]) # [A1,A2,A3,A4] -> [A2,A3,A4,A5,A0,A1]
-        print('optimize:',destinationListPermutations)
-        
-        costsList = [self.__cost(perm, aircraft) for perm in destinationListPermutations] #Find the total cost of each permutation
-        return min(costsList) #Find the smallest costing permutation and return it with it's cost
+        #print('optimize:',destinationListPermutations)
+        #costsList = []
+        lowestCost = float("inf") #positive infinity to start...
+        cheapestPermutation = []
+        for perm in destinationListPermutations: 
+            #attach home and first destination to the end of each perm and find the total cost of the perm
+            perm.extend([homeDestination, perm[0]]) # [A1,A2,A3,A4] -> [A1,A2,A3,A4,A0,A1]
+            extendedPerm = perm
+            cost = self.__cost(extendedPerm, aircraft)
+            if cost is None: 
+                #Indicates that there's a leg that the aircraft can't complete, this perm is not possible, discard it.
+                print("Aircraft",aircraft,"cannot complete itinerary",destinationList[:5])
+                continue #try the next perm...
+            elif cost == -1: 
+                #Indicates that one of the airport codes is invalid, this destination list is not possible, abort the search.
+                print('optimize: one of airport codes is invalid, aborting optimization for this route.')
+                return None
+            if cost < lowestCost: #If all is good an valid, keep track of the best perm.
+                lowestCost = cost
+                cheapestPermutation = [homeDestination, perm[0], perm[1], perm[2], perm[3], homeDestination]
+                print('optimize: cheapest perm:',cheapestPermutation)
+                
+        return cheapestPermutation #Find the smallest costing perm and return it with it's cost
     
     def __permute(self, destinationList): #generate permutation for the destinations excluding home start airport
         permutationTuples = itertools.permutations(destinationList[1:5]) #slice the 4 destination airports and permute them
         return list([list(_) for _ in permutationTuples]) #itertools.permutations() returns tuples, need to make them lists to modify later
     
     def __cost(self, destinationPermutation, aircraft): #calculate the cost of a permutation    
-        print('cost: ', aircraft)
+        print('Aircraft info:', aircraft)
+        print('cost:',destinationPermutation)
+        if aircraft is None:
+            return None
+        aircraftRange = aircraft[1]
         airportList = self.__airports.getAirports(destinationPermutation) #get airport information for each of the codes.
         #e.g. 'OLT' -> ['United States', 'OLT', 32.7552, -117.1995]
-        costList = []
+        distanceList = []
         print('cost:',airportList)
+        
+        #airportDistanceCost = {}
+        for i in range(0, len(airportList)-1):
+            if airportList[i] is None or airportList[i+1] is None:
+                return -1 #One of the airport codes is invalid
+            distance, airport = coordDist(airportList[i][2:5], airportList[i+1][2:5]), airportList[i+1][0]
+            #airportDistanceCost[airportList[i+1][0]] = distance
+            if distance > aircraftRange: #if any leg is longer than aircraft range
+                return None
+            distanceList.append([distance, airport])
+            #print(distanceList)
+            
+        costList = []
         try:
-            for i in range(0, len(airportList)-1):
-                distance = coordDist(airportList[i][2:5], airportList[i+1][2:5])
-                costList.append(distance)
-                #print(costList)
+            costList.append(distanceList[4][0]*self.__currency.getExchangeRate(distanceList[4][1]))
+            costList.append(distanceList[0][0]*self.__currency.getExchangeRate(distanceList[0][1]))
+            costList.append(distanceList[1][0]*self.__currency.getExchangeRate(distanceList[1][1]))
+            costList.append(distanceList[2][0]*self.__currency.getExchangeRate(distanceList[2][1]))
+            costList.append(distanceList[3][0]*self.__currency.getExchangeRate(distanceList[3][1]))
         except Exception as e:
             traceback.print_exc()
+            return None #Means one of the currencies was not found and/or invalid
             
-        print('cost:',costList)
-        return 0
+        print('cost: distList',distanceList)
+        print('cost: costList',costList)
+        return sum(costList)
     
 
 def coordDist(latLong1, latLong2):

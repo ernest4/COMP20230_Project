@@ -69,7 +69,6 @@ class Aircraft:
     
     def getAircraft(self, code):
         code = code.upper()
-        print(code)
         try:
             return self.__df_aircraft.loc[self.__df_aircraft['code'] == code].values.tolist()[0]
         except Exception as e:
@@ -125,18 +124,24 @@ class Currency:
         except IOError as e:
             traceback.print_exc()
             
-        self.__df_countrycurrency = self.__df_countrycurrency[self.__df_countrycurrency.columns[14:16]]
+        self.__df_countrycurrency = self.__df_countrycurrency[[self.__df_countrycurrency.columns[14],self.__df_countrycurrency.columns[15],self.__df_countrycurrency.columns[0]]]
         self.__df_countrycurrency = cleanUp(self.__df_countrycurrency)
         
         self.__df_currencyrates = self.__df_currencyrates[self.__df_currencyrates.columns[1:3]]
         self.__df_currencyrates = cleanUp(self.__df_currencyrates)
     
     def getExchangeRate(self, countryName):
-        countryName = countryName.upper()
+        countryNameUpper = countryName.upper()
         try:
-            code = self.__df_countrycurrency.loc[self.__df_countrycurrency['currency_country_name'] == countryName].values.tolist()[0][0]
-            return self.__df_currencyrates.loc[self.__df_currencyrates['currency_alphabetic_code'] == code].values.tolist()[0][1]
+            #Try finding currency code using country main name
+            code = self.__df_countrycurrency.loc[self.__df_countrycurrency['currency_country_name'] == countryNameUpper].values.tolist()
+            if not code: #Try finding currency code using country alternative name
+                code = self.__df_countrycurrency.loc[self.__df_countrycurrency['name'] == countryName].values.tolist()
+            if not code:
+                return None #No currency code found for requested country
+            return self.__df_currencyrates.loc[self.__df_currencyrates['currency_alphabetic_code'] == code[0][0]].values.tolist()[0][1]
         except Exception as e:
+            traceback.print_exc()
             return None
         
 class InputRoutes:

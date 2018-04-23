@@ -91,6 +91,8 @@ class Test(unittest.TestCase):
         self.assertTrue(c.getExchangeRate('Afghanistan') == 0.016440) #1 Afghani == 0.016440 Euro
         self.assertTrue(c.getExchangeRate('Albania') == 0.007237) #1 Albanian Lek == 0.007237 Euro
         self.assertTrue(c.getExchangeRate('thisCountryDoesNotExist') == None) #get None for invalid countries
+        self.assertTrue(c.getExchangeRate('RUSSIAN FEDERATION') == 0.01524) #get Russia's exchange rate using alternative
+        self.assertTrue(c.getExchangeRate('Russia') == 0.01524) #get Russia's exchange rate using regular name
         
     def test_inputRoutes(self):
         ir = InputRoutes('testdata/testroutesOld.csv')
@@ -116,10 +118,10 @@ class Test(unittest.TestCase):
     def test_itineraryOptimizer(self):
         io = ItineraryOptimizer(self.filesDict)
         self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [LUP,EKI,YPO,MRV,AGM,LUP,30672.26] or [LUP,AGM,MRV,YPO,EKI,LUP,30672.26]
-        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [MAM,NBX,ERS,BXR,GDN,MAM,47313.41]
-        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [OLA,OLT,MNZ,ELU,EGR,OLA,25842.14] or [OLA,EGR,ELU,MNZ,OLT,OLA,25842.14]
-        self.assertTrue(io.getOptimizedItinerary(3) != None)
-        self.assertTrue(len(io.getOptimizedItinerary()) == 34) 
+        #self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [MAM,NBX,ERS,BXR,GDN,MAM,47313.41]
+        #self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [OLA,OLT,MNZ,ELU,EGR,OLA,25842.14] or [OLA,EGR,ELU,MNZ,OLT,OLA,25842.14]
+        #self.assertTrue(io.getOptimizedItinerary(3) != None)
+        #self.assertTrue(len(io.getOptimizedItinerary()) == 34) 
         
 if __name__ == '__main__':
     unittest.main()
