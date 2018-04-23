@@ -3,6 +3,7 @@
 import sys
 import optparse
 from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
+import pandas as pd
 
 def main(argv=None):
     if argv is None:
@@ -37,8 +38,8 @@ def main(argv=None):
         
     itineraryOptimizer = ItineraryOptimizer(optsDict)
     
-    #optimizedItineraries = itineraryOptimizer.getOptimizedItinerary() #return all optimized itineraries
-    #pd.DataFrame(optimizedItineraries).to_csv(optsDict['outputFile']) #Output optimized itineraries to .csv
+    optimizedItineraries = itineraryOptimizer.getOptimizedItinerary() #return all optimized itineraries
+    pd.DataFrame(optimizedItineraries).to_csv(optsDict['outputFile']) #Output optimized itineraries to .csv
     
 if __name__ == "__main__":
     main()

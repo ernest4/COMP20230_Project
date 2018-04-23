@@ -70,7 +70,7 @@ class ItineraryOptimizer:
                 return None
             if cost < lowestCost: #If all is good an valid, keep track of the best perm.
                 lowestCost = cost
-                cheapestPermutation = [homeDestination, perm[0], perm[1], perm[2], perm[3], homeDestination]
+                cheapestPermutation = [homeDestination, perm[0], perm[1], perm[2], perm[3], homeDestination, lowestCost]
                 print('optimize: cheapest perm:',cheapestPermutation)
                 
         return cheapestPermutation #Find the smallest costing perm and return it with it's cost
@@ -94,20 +94,22 @@ class ItineraryOptimizer:
         for i in range(0, len(airportList)-1):
             if airportList[i] is None or airportList[i+1] is None:
                 return -1 #One of the airport codes is invalid
-            distance, airport = coordDist(airportList[i][2:5], airportList[i+1][2:5]), airportList[i+1][0]
+            fromAirport, distance, toAirport = airportList[i][0], coordDist(airportList[i][2:5], airportList[i+1][2:5]), airportList[i+1][0]
             #airportDistanceCost[airportList[i+1][0]] = distance
             if distance > aircraftRange: #if any leg is longer than aircraft range
                 return None
-            distanceList.append([distance, airport])
+            distanceList.append([fromAirport, distance, toAirport])
             #print(distanceList)
             
         costList = []
         try:
-            costList.append(distanceList[4][0]*self.__currency.getExchangeRate(distanceList[4][1]))
-            costList.append(distanceList[0][0]*self.__currency.getExchangeRate(distanceList[0][1]))
-            costList.append(distanceList[1][0]*self.__currency.getExchangeRate(distanceList[1][1]))
-            costList.append(distanceList[2][0]*self.__currency.getExchangeRate(distanceList[2][1]))
-            costList.append(distanceList[3][0]*self.__currency.getExchangeRate(distanceList[3][1]))
+            #costList.append(distanceList[4][0]*self.__currency.getExchangeRate(distanceList[4][1]))
+            #costList.append(distanceList[0][0]*self.__currency.getExchangeRate(distanceList[0][1]))
+            #costList.append(distanceList[1][0]*self.__currency.getExchangeRate(distanceList[1][1]))
+            #costList.append(distanceList[2][0]*self.__currency.getExchangeRate(distanceList[2][1]))
+            #costList.append(distanceList[3][0]*self.__currency.getExchangeRate(distanceList[3][1]))
+            for i in range(0, len(distanceList)):
+                costList.append(distanceList[i][1]*self.__currency.getExchangeRate(distanceList[i][2]))
         except Exception as e:
             traceback.print_exc()
             return None #Means one of the currencies was not found and/or invalid
