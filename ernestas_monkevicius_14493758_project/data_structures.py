@@ -7,6 +7,7 @@ Created on 3 Apr 2018
 import pandas as pd
 from ernestas_monkevicius_14493758_project.utility import cleanUp
 import traceback
+import sys
 
 class Graph:
     '''Models the graph data structure.'''
@@ -55,8 +56,10 @@ class Aircraft:
         '''
         try:
             self.__df_aircraft = pd.read_csv(file, skipinitialspace=True)
-        except IOError as e:
-            traceback.print_exc()
+        except IOError as e: #Cannot read given file, load default
+            print('Cannot read file,',file,' loading default...')
+            self.__df_aircraft = pd.read_csv('data/aircraft.csv', skipinitialspace=True)
+            #traceback.print_exc()
             
         self.__df_aircraft = self.__df_aircraft[['code', 'units', 'range']]
         self.__df_aircraft.loc[self.__df_aircraft['units'] == 'imperial', 'range'] *= 1.60934 #1.60934 is miles to kilometers
@@ -87,10 +90,13 @@ class Airport:
         try:
             self.__df_airport = pd.read_csv(file, skipinitialspace=True, header=None, names=[0,1,2,'country', 'IATA', 'ICAO','N_lat','E_lon',8,9,10,11])
         except IOError as e:
-            traceback.print_exc()
+            print('Cannot read file,',file,' loading default...')
+            self.__df_airport = pd.read_csv('data/airport.csv', skipinitialspace=True, header=None, names=[0,1,2,'country', 'IATA', 'ICAO','N_lat','E_lon',8,9,10,11])
+            #traceback.print_exc()
             
+        #extract the required columns
         self.__df_airport = self.__df_airport[['country', 'IATA','N_lat','E_lon']]
-        self.__df_airport = cleanUp(self.__df_airport)
+        self.__df_airport = cleanUp(self.__df_airport) #Remove duplicate rows and rows with NaN values
         
     def getAirports(self, codes):
         if type(codes) != type([]) and type(codes) != type(tuple()):
@@ -120,15 +126,25 @@ class Currency:
         '''
         try:
             self.__df_countrycurrency = pd.read_csv(countryCurrencyFile, skipinitialspace=True)
+        except IOError as e:
+            print('Cannot read file,',countryCurrencyFile,' loading default...')
+            self.__df_countrycurrency = pd.read_csv('data/countrycurrency.csv', skipinitialspace=True)
+            #traceback.print_exc()
+            
+        try:
             self.__df_currencyrates = pd.read_csv(currencyRatesFile, skipinitialspace=True, header=None, names=['name', 'currency_alphabetic_code', 'toEuro', 'fromEuro'])
         except IOError as e:
-            traceback.print_exc()
+            print('Cannot read file,',currencyRatesFile,' loading default...')
+            self.__df_currencyrates = pd.read_csv('data/currencyrates.csv', skipinitialspace=True, header=None, names=['name', 'currency_alphabetic_code', 'toEuro', 'fromEuro'])
+            #traceback.print_exc()
             
+        #extract the required columns
         self.__df_countrycurrency = self.__df_countrycurrency[[self.__df_countrycurrency.columns[14],self.__df_countrycurrency.columns[15],self.__df_countrycurrency.columns[0]]]
-        self.__df_countrycurrency = cleanUp(self.__df_countrycurrency)
+        self.__df_countrycurrency = cleanUp(self.__df_countrycurrency) #Remove duplicate rows and rows with NaN values
         
+        #extract the required columns
         self.__df_currencyrates = self.__df_currencyrates[self.__df_currencyrates.columns[1:3]]
-        self.__df_currencyrates = cleanUp(self.__df_currencyrates)
+        self.__df_currencyrates = cleanUp(self.__df_currencyrates) #Remove duplicate rows and rows with NaN values
     
     def getExchangeRate(self, countryName):
         countryNameUpper = countryName.upper()
@@ -158,9 +174,11 @@ class InputRoutes:
             self.__df_routes = pd.read_csv(file, skipinitialspace=True, header=None,
                           error_bad_lines=False, names=[x for x in range(0,6)])
         except Exception as e:
-            traceback.print_exc()
+            sys.exit("Cannot read input file: "+file)
+            #traceback.print_exc()
             
-        self.__df_routes = self.__df_routes.dropna(subset=[0,1,2,3,4]) #Drop any itineraries which do not have 5 values for airports
+        #Drop any itineraries which do not have 5 values for airports
+        self.__df_routes = self.__df_routes.dropna(subset=[0,1,2,3,4])
         
     @property
     def next(self): #Get one itinerary list from the dataframe at a time.
