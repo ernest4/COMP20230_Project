@@ -46,7 +46,7 @@ class ItineraryOptimizer:
         print("\nOptimizing itinerary:", destinationList)
         aircraft = self.__aircraft.getAircraft(destinationList[-1])
         if aircraft is None: #No valid aircraft provided means no flight plan made
-            return None
+            return []
         homeDestination = destinationList[0]
         #print('optimize: ',aircraft)
         #print('optimize:',destinationList[0])
@@ -67,7 +67,7 @@ class ItineraryOptimizer:
             elif cost == -1: 
                 #Indicates that one of the airport codes is invalid, this destination list is not possible, abort the search.
                 print('optimize: one of airport codes is invalid, aborting optimization for this route.')
-                return None
+                return []
             if cost < lowestCost: #If all is good an valid, keep track of the best perm.
                 lowestCost = cost
                 cheapestPermutation = [homeDestination, perm[0], perm[1], perm[2], perm[3], homeDestination, lowestCost]
@@ -103,11 +103,6 @@ class ItineraryOptimizer:
             
         costList = []
         try:
-            #costList.append(distanceList[4][0]*self.__currency.getExchangeRate(distanceList[4][1]))
-            #costList.append(distanceList[0][0]*self.__currency.getExchangeRate(distanceList[0][1]))
-            #costList.append(distanceList[1][0]*self.__currency.getExchangeRate(distanceList[1][1]))
-            #costList.append(distanceList[2][0]*self.__currency.getExchangeRate(distanceList[2][1]))
-            #costList.append(distanceList[3][0]*self.__currency.getExchangeRate(distanceList[3][1]))
             for i in range(0, len(distanceList)):
                 costList.append(distanceList[i][1]*self.__currency.getExchangeRate(distanceList[i][2]))
         except Exception as e:
