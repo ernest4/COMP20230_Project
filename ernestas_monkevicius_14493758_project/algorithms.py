@@ -45,8 +45,9 @@ class ItineraryOptimizer:
     def __optimize(self, destinationList): #get the optimal route - brute force
         print("\nOptimizing itinerary:", destinationList)
         aircraft = self.__aircraft.getAircraft(destinationList[-1])
-        if aircraft is None: #No valid aircraft provided means no flight plan made
-            return []
+        if aircraft is None: #No valid aircraft found
+            return [] #No valid aircraft provided means no flight plan made
+            #aircraft = ['A321', 12000.0] #HARDCODED PLANE WITH LONEGEST RANGE, MAKE DYNAMIC !
         homeDestination = destinationList[0]
         #print('optimize: ',aircraft)
         #print('optimize:',destinationList[0])
