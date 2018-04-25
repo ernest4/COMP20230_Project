@@ -4,7 +4,6 @@ import sys
 import optparse
 from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
 import pandas as pd
-from _operator import index
 
 def main(argv=None):
     if argv is None:
@@ -24,23 +23,31 @@ def main(argv=None):
     if opts.inputFile is None:
         parser.error("Argument [-i input_file] required. For more help use -h or --help.")
         
-    filesDict = { 'outputFile' : 'bestroutes.csv',
-                  'currencyFile' : 'data/currencyrates.csv',
-                  'countryCurrencyFile' : 'data/countrycurrency.csv',
-                  'airportsFile' : 'data/airport.csv',
-                  'aircraftFile' : 'data/aircraft.csv'}
+    #default files dictionary. In case input files are incorrect or not provided as they are optional.
+    defaultFilesDict = { 'outputFile'  : 'bestroutes.csv',
+                          'currencyFile' : 'data/currencyrates.csv',
+                          'countryCurrencyFile' : 'data/countrycurrency.csv',
+                          'airportsFile' : 'data/airport.csv',
+                          'aircraftFile' : 'data/aircraft.csv'}
     
-    optsDict = vars(opts)
-    for opt in optsDict: #Check if input is given, if not, provide default files
-        if optsDict[opt] is None:
-            optsDict[opt] = filesDict[opt]
-        elif not optsDict[opt].endswith('.csv'):
-            parser.error("Expected .csv file, instead of "+optsDict[opt])
+    #This block of code checks the command line arguments and assigns default
+    #files to file options which were not provided by the user.
+    inputFileOptionsDict = vars(opts) #extract the command line arguments
+    for fileOption in inputFileOptionsDict: #Check if input is given, if not, provide default files.
+        if inputFileOptionsDict[fileOption] is None:
+            inputFileOptionsDict[fileOption] = defaultFilesDict[fileOption]
+        elif not inputFileOptionsDict[fileOption].endswith('.csv'): #If file is provided, make sure it's correct type.
+            parser.error("Expected .csv file, instead of "+inputFileOptionsDict[fileOption])
         
-    itineraryOptimizer = ItineraryOptimizer(optsDict)
+    #ItineraryOptimizer is the workhorse of this program, takes in itineraries and produces best routes
+    itineraryOptimizer = ItineraryOptimizer(inputFileOptionsDict)
     
-    optimizedItineraries = itineraryOptimizer.getOptimizedItinerary() #return all optimized itineraries
-    pd.DataFrame(optimizedItineraries).to_csv(optsDict['outputFile'], header=False, index=False) #Output optimized itineraries to .csv
+    #return all optimized itineraries
+    optimizedItineraries = itineraryOptimizer.getOptimizedItinerary()
+    
+    #Output optimized itineraries to .csv using pandas
+    pd.DataFrame(optimizedItineraries).to_csv(inputFileOptionsDict['outputFile'], header=False, index=False)
     
 if __name__ == "__main__":
     main()
+    

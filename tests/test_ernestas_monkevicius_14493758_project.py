@@ -117,9 +117,9 @@ class Test(unittest.TestCase):
     
     def test_itineraryOptimizer(self):
         io = ItineraryOptimizer(self.filesDict)
-        self.assertTrue(io.getOptimizedItinerary(1) == [['LUP', 'AGM', 'MRV', 'YPO', 'EKI', 'LUP', 15166.05498]]) #possible solutions [LUP,EKI,YPO,MRV,AGM,LUP,30672.26] or [LUP,AGM,MRV,YPO,EKI,LUP,30672.26]
-        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [MAM,NBX,ERS,BXR,GDN,MAM,47313.41]
-        self.assertTrue(io.getOptimizedItinerary(1) != None) #possible solutions [OLA,OLT,MNZ,ELU,EGR,OLA,25842.14] or [OLA,EGR,ELU,MNZ,OLT,OLA,25842.14]
+        self.assertTrue(io.getOptimizedItinerary(1) == [['LUP', 'AGM', 'MRV', 'YPO', 'EKI', 'LUP', 15166.05498]])
+        self.assertTrue(io.getOptimizedItinerary(1) == [['MAM', 'NBX', 'BXR', 'GDN', 'ERS', 'MAM', 2508.7659795]])
+        self.assertTrue(io.getOptimizedItinerary(1) == [['OLA', 'MNZ', 'OLT', 'ELU', 'EGR', 'OLA', 10087.174878]])
         self.assertTrue(io.getOptimizedItinerary(3) != None)
         self.assertTrue(len(io.getOptimizedItinerary()) == 34) 
         

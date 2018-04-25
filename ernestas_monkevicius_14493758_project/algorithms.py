@@ -13,83 +13,119 @@ from scipy.special.basic import perm
 
 class ItineraryOptimizer:
     '''
-    Takes in itineraries and produces best or approximate best route for the itinerary.
+    Takes in itineraries and supporting files and produces the best route for
+    the itinerary, via exhaustive brute force evaluation.
     '''
 
     def __init__(self, files):
         '''
-        Constructor
+        Takes in a list of files and creates instances of appropriate classes
+        to store and prepare those files.
         '''
         self.__inputRoutes = InputRoutes(files['inputFile'])
         self.__airports = Airport(files['airportsFile'])
         self.__aircraft = Aircraft(files['aircraftFile'])
-        self.__currency = Currency(files['countryCurrencyFile'], files['currencyFile'])
+        self.__currency = Currency(files['countryCurrencyFile'],
+                                    files['currencyFile'])
+        
         
     def getOptimizedItinerary(self, number=None):
-        '''Returns a desired number of optimized itineraries, if number=None then return all.'''
+        '''
+        getOptimizedItinerary(number : integer) 
+        -> (optimizedRoutesList : list of lists)
+        
+        Returns a desired number of optimized itineraries,
+        if number=None then return all.
+        '''
+        
+        #If no specific number given, set number of itineraries to be processed
+        #to equal all the itineraries in the input file.
         if number is None:
             number = self.__inputRoutes.size
             
         optimizedRoutesList = []
-        try:
-            for _ in range(0, number):
-                optimizedRoutesList.append(self.__optimize(self.__inputRoutes.next))
-                #itinerary = self.__inputRoutes.next
-                #optimizedRoutesList.append(self.__optimize(itinerary))
-        except IndexError: #when EOF is reached
-            print('getOptimizedItinerary: IndexError',optimizedRoutesList) #TESTING
-            return optimizedRoutesList
+        for _ in range(0, number): #for the number of itineraries required.
+            #Get the the itinerary to process
+            nextItinerary = self.__inputRoutes.next
+            
+            #If we successfully got an itinerary, optimize it.
+            if nextItinerary is not None:
+                optimizedRoutesList.append(self.__optimize(nextItinerary))
+            else:
+                #If EOF is reached, no more itineraries left to process.
+                break
+            
         print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
-        return optimizedRoutesList
+        return optimizedRoutesList #Return all optimized itineraries.
+    
     
     def __optimize(self, destinationList): #get the optimal route - brute force
+        '''
+        __optimize(destinationList : list) -> (cheapestPermutation : list)
+        
+        Returns a cheapest permuation with it's cost.
+        '''
+        
         print("\nOptimizing itinerary:", destinationList)
+        
         aircraft = self.__aircraft.getAircraft(destinationList[-1])
         if aircraft is None: #No valid aircraft found
             return [] #No valid aircraft provided means no flight plan made
             #aircraft = ['A321', 12000.0] #HARDCODED PLANE WITH LONEGEST RANGE, MAKE DYNAMIC !
+            
         homeDestination = destinationList[0]
-        #print('optimize: ',aircraft)
-        #print('optimize:',destinationList[0])
         destinationListPermutations = self.__permute(destinationList)
-        #print('optimize:',destinationListPermutations)
-        #costsList = []
         lowestCost = float("inf") #positive infinity to start...
         cheapestPermutation = []
-        for perm in destinationListPermutations: 
-            #attach home and first destination to the end of each perm and find the total cost of the perm
-            perm.extend([homeDestination, perm[0]]) # [A1,A2,A3,A4] -> [A1,A2,A3,A4,A0,A1]
-            extendedPerm = perm
+        for permutation in destinationListPermutations: 
+            #attach home and first destination to the end of each permutation and find
+            #the total cost of the permutation
+            permutation.extend([homeDestination, permutation[0]]) # [A1,A2,A3,A4] -> [A1,A2,A3,A4,A0,A1]
+            extendedPerm = permutation
             cost = self.__cost(extendedPerm, aircraft)
             if cost is None: 
-                #Indicates that there's a leg that the aircraft can't complete, this perm is not possible, discard it.
-                print("Aircraft",aircraft,"cannot complete itinerary",destinationList[:5])
-                continue #try the next perm...
+                #Indicates that there's a leg that the aircraft can't complete, this permutation is not possible, discard it.
+                continue #try the next permutation...
             elif cost == -1: 
                 #Indicates that one of the airport codes is invalid, this destination list is not possible, abort the search.
-                print('optimize: one of airport codes is invalid, aborting optimization for this route.')
                 return []
-            if cost < lowestCost: #If all is good an valid, keep track of the best perm.
+            if cost < lowestCost: #If all is good an valid, keep track of the best permutation.
                 lowestCost = cost
-                cheapestPermutation = [homeDestination, perm[0], perm[1], perm[2], perm[3], homeDestination, lowestCost]
-                print('optimize: cheapest perm:',cheapestPermutation)
+                cheapestPermutation = [homeDestination, permutation[0],
+                                        permutation[1], permutation[2],
+                                         permutation[3], homeDestination,
+                                          lowestCost]
                 
-        return cheapestPermutation #Find the smallest costing perm and return it with it's cost
+        #Lowest costing permutation and return with it's cost
+        return cheapestPermutation
+    
     
     def __permute(self, destinationList): #generate permutation for the destinations excluding home start airport
+        '''
+        __permute(destinationList : list) -> list of lists
+        
+        Returns list of permutations for a list of destinations excluding home start airport.
+        '''
         permutationTuples = itertools.permutations(destinationList[1:5]) #slice the 4 destination airports and permute them
         return list([list(_) for _ in permutationTuples]) #itertools.permutations() returns tuples, need to make them lists to modify later
     
+    
     def __cost(self, destinationPermutation, aircraft): #calculate the cost of a permutation    
-        print('Aircraft info:', aircraft)
-        print('cost:',destinationPermutation)
+        '''
+        __cost(destinationPermutation : list, aircraft : list) -> int
+        
+        Returns list of permutations for a list of destinations.
+        '''
+        
+        #print('Aircraft info:', aircraft)
+        #print('cost:',destinationPermutation)
         if aircraft is None:
             return None
         aircraftRange = aircraft[1]
         airportList = self.__airports.getAirports(destinationPermutation) #get airport information for each of the codes.
         #e.g. 'OLT' -> ['United States', 'OLT', 32.7552, -117.1995]
         distanceList = []
-        print('cost:',airportList)
+        #print('cost:',airportList)
         
         #airportDistanceCost = {}
         for i in range(0, len(airportList)-1):
@@ -110,13 +146,18 @@ class ItineraryOptimizer:
             traceback.print_exc()
             return None #Means one of the currencies was not found and/or invalid
             
-        print('cost: distList',distanceList)
-        print('cost: costList',costList)
+        #print('cost: distList',distanceList)
+        #print('cost: costList',costList)
         return sum(costList)
     
 
 def coordDist(latLong1, latLong2):
-        """Returns the great circle distance between two sets of coordinates"""
+        '''
+        coordDist(latLong1 : list, latLong2 : list) -> float
+        
+        Returns the great circle distance between two sets of coordinates.
+        '''
+        
         lat1 = math.radians(90-latLong1[0])
         long1 = math.radians(latLong1[1])
         lat2 = math.radians(90-latLong2[0])
@@ -126,6 +167,7 @@ def coordDist(latLong1, latLong2):
         product2 = math.cos(lat1)*math.cos(lat2)
 
         return round(math.acos(product1+product2)*6371)
+
 
 def optimalPath(graph, rootNode, targetNode):
     '''Based on algorithm from Wikipedia: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
@@ -172,6 +214,7 @@ def optimalPath(graph, rootNode, targetNode):
     S.append(u)
     S.reverse() #reverse the path to point from source to target
     return S
+
 
 def BFS(graph, rootNode):
     '''Finds all the nodes in the graph, starting from rootNode.'''

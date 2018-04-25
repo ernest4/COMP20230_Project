@@ -45,6 +45,7 @@ class Graph:
             returnStr = "\n".join([returnStr,''.join([v,"->",str(self.__vertices[v])])])
         return returnStr
 
+
 class Aircraft:
     '''
     Stores aircraft codes and ranges.
@@ -68,15 +69,18 @@ class Aircraft:
     
     @property
     def aircraft(self):
+        #Return all aircraft in the dataframe
         return self.__df_aircraft.values.tolist()
     
     def getAircraft(self, code):
         code = code.upper()
         try:
+            #Look for aircraft in the dataframe.
             return self.__df_aircraft.loc[self.__df_aircraft['code'] == code].values.tolist()[0]
         except Exception as e:
-            print("Aircraft code:",code,"is not found in input file or is invalid.")
+            #Failed to find aircraft.
             return None
+
 
 class Airport:
     '''
@@ -160,6 +164,7 @@ class Currency:
             traceback.print_exc()
             return None
         
+        
 class InputRoutes:
     '''
     Stores the input routes.
@@ -183,7 +188,10 @@ class InputRoutes:
     @property
     def next(self): #Get one itinerary list from the dataframe at a time.
         self.dataframeIndex += 1
-        return [str(_).upper() for _ in self.__df_routes.iloc[self.dataframeIndex].values.tolist()]
+        if self.dataframeIndex < self.size:
+            return [str(_).upper() for _ in self.__df_routes.iloc[self.dataframeIndex].values.tolist()]
+        else:
+            return None
     
     @property
     def size(self): #Get the total number of itineraries in the dataframe
