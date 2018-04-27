@@ -64,7 +64,7 @@ class ItineraryOptimizer:
                 #If EOF is reached, no more itineraries left to process.
                 break
             
-        print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
+        #print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
         return optimizedRoutesList #Return all optimized itineraries.
     
     
