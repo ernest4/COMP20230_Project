@@ -4,8 +4,11 @@ import sys
 import optparse
 from ernestas_monkevicius_14493758_project.algorithms import ItineraryOptimizer
 import pandas as pd
+import time
 
 def main(argv=None):
+    startTime = time.time()
+    
     if argv is None:
         argv = sys.argv[1:]
     
@@ -47,6 +50,10 @@ def main(argv=None):
     
     #Output optimized itineraries to .csv using pandas
     pd.DataFrame(optimizedItineraries).to_csv(inputFileOptionsDict['outputFile'], header=False, index=False)
+    
+    endTime = time.time()
+    print("Finished in:", (endTime-startTime),'seconds.')
+    print("Solutions in:",inputFileOptionsDict['outputFile'])
     
 if __name__ == "__main__":
     main()

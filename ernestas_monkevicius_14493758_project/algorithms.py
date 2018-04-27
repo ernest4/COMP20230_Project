@@ -9,19 +9,22 @@ from ernestas_monkevicius_14493758_project.data_structures import *
 import os
 import traceback
 import itertools
-from scipy.special.basic import perm
 
 class ItineraryOptimizer:
     '''
     Takes in itineraries and supporting files and produces the best route for
     the itinerary, via exhaustive brute force evaluation.
     '''
+    
+    #Global variable for the class. Contains the cached information for a cost of a leg.
+    airportLegCostCacheDict = {}
 
     def __init__(self, files):
         '''
         Takes in a list of files and creates instances of appropriate classes
         to store and prepare those files.
         '''
+        
         self.__inputRoutes = InputRoutes(files['inputFile'])
         self.__airports = Airport(files['airportsFile'])
         self.__aircraft = Aircraft(files['aircraftFile'])
@@ -55,7 +58,7 @@ class ItineraryOptimizer:
                 #If EOF is reached, no more itineraries left to process.
                 break
             
-        print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
+        #print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
         return optimizedRoutesList #Return all optimized itineraries.
     
     
@@ -66,7 +69,7 @@ class ItineraryOptimizer:
         Returns a cheapest permuation with it's cost.
         '''
         
-        print("\nOptimizing itinerary:", destinationList)
+        #print("Optimizing itinerary:", destinationList)
         
         aircraft = self.__aircraft.getAircraft(destinationList[-1])
         if aircraft is None: #No valid aircraft found
@@ -75,28 +78,37 @@ class ItineraryOptimizer:
             
         homeDestination = destinationList[0]
         destinationListPermutations = self.__permute(destinationList)
-        lowestCost = float("inf") #positive infinity to start...
+        
+        #Positive infinity to start when comparing the cost of the cheapest permutation.
+        lowestCost = float("inf")
+        
         cheapestPermutation = []
         for permutation in destinationListPermutations: 
-            #attach home and first destination to the end of each permutation and find
-            #the total cost of the permutation
-            permutation.extend([homeDestination, permutation[0]]) # [A1,A2,A3,A4] -> [A1,A2,A3,A4,A0,A1]
+            #Attach home and first destination to the end of each permutation
+            #and find the total cost of the permutation.
+            # [A1,A2,A3,A4] -> [A1,A2,A3,A4,A0,A1]
+            
+            permutation.extend([homeDestination, permutation[0]])
             extendedPerm = permutation
+            
             cost = self.__cost(extendedPerm, aircraft)
             if cost is None: 
-                #Indicates that there's a leg that the aircraft can't complete, this permutation is not possible, discard it.
+                #Indicates that there's a leg that the aircraft can't complete,
+                #this permutation is not possible, discard it.
                 continue #try the next permutation...
-            elif cost == -1: 
-                #Indicates that one of the airport codes is invalid, this destination list is not possible, abort the search.
+            elif cost == -1:
+                #Indicates that one of the airport codes or currencies is invalid
+                #and/or missing, this route list is not possible, abort the search.
                 return []
+                
             if cost < lowestCost: #If all is good an valid, keep track of the best permutation.
-                lowestCost = cost
+                lowestCost = cost #Keep track of the lowest.
                 cheapestPermutation = [homeDestination, permutation[0],
                                         permutation[1], permutation[2],
                                          permutation[3], homeDestination,
                                           lowestCost]
                 
-        #Lowest costing permutation and return with it's cost
+        #Lowest costing permutation with it's cost
         return cheapestPermutation
     
     
@@ -106,9 +118,11 @@ class ItineraryOptimizer:
         
         Returns list of permutations for a list of destinations excluding home start airport.
         '''
-        permutationTuples = itertools.permutations(destinationList[1:5]) #slice the 4 destination airports and permute them
-        return list([list(_) for _ in permutationTuples]) #itertools.permutations() returns tuples, need to make them lists to modify later
-    
+        #slice the 4 destination airports and permute them
+        permutationTuples = itertools.permutations(destinationList[1:5])
+        #itertools.permutations() returns tuples, need to make them lists to modify later
+        return list([list(_) for _ in permutationTuples])
+        
     
     def __cost(self, destinationPermutation, aircraft): #calculate the cost of a permutation    
         '''
@@ -117,38 +131,37 @@ class ItineraryOptimizer:
         Returns list of permutations for a list of destinations.
         '''
         
-        #print('Aircraft info:', aircraft)
-        #print('cost:',destinationPermutation)
-        if aircraft is None:
-            return None
         aircraftRange = aircraft[1]
         airportList = self.__airports.getAirports(destinationPermutation) #get airport information for each of the codes.
         #e.g. 'OLT' -> ['United States', 'OLT', 32.7552, -117.1995]
-        distanceList = []
-        #print('cost:',airportList)
         
-        #airportDistanceCost = {}
+        #If one of the airport codes is invalid, return prematurely.
+        for airport in airportList:
+            if airport is None:
+                return -1
+        
+        total = 0
         for i in range(0, len(airportList)-1):
-            if airportList[i] is None or airportList[i+1] is None:
-                return -1 #One of the airport codes is invalid
-            fromAirport, distance, toAirport = airportList[i][0], coordDist(airportList[i][2:5], airportList[i+1][2:5]), airportList[i+1][0]
-            #airportDistanceCost[airportList[i+1][0]] = distance
-            if distance > aircraftRange: #if any leg is longer than aircraft range
+            fromAirport = airportList[i][0]
+            toAirport = airportList[i+1][0]
+            
+            #If no cached value is found, compute the distance between start
+            #airport and destination airport
+            distance = coordDist(airportList[i][2:5], airportList[i+1][2:5])
+            
+            #if any leg is longer than aircraft range, this permutation can't be flown.
+            if distance > aircraftRange:
                 return None
-            distanceList.append([fromAirport, distance, toAirport])
-            #print(distanceList)
             
-        costList = []
-        try:
-            for i in range(0, len(distanceList)):
-                costList.append(distanceList[i][1]*self.__currency.getExchangeRate(distanceList[i][2]))
-        except Exception as e:
-            traceback.print_exc()
-            return None #Means one of the currencies was not found and/or invalid
+            exchangeRate = self.__currency.getExchangeRate(toAirport)
+            if exchangeRate is not None:
+                #Update the total cost
+                total += distance*exchangeRate
+            else:
+                #Means one of the currencies was not found and/or invalid
+                return -1
             
-        #print('cost: distList',distanceList)
-        #print('cost: costList',costList)
-        return sum(costList)
+        return total
     
 
 def coordDist(latLong1, latLong2):
