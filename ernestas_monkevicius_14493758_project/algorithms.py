@@ -47,18 +47,24 @@ class ItineraryOptimizer:
             number = self.__inputRoutes.size
             
         optimizedRoutesList = []
-        for _ in range(0, number): #for the number of itineraries required.
+        for i in range(0, number): #for the number of itineraries required.
             #Get the the itinerary to process
             nextItinerary = self.__inputRoutes.next
             
             #If we successfully got an itinerary, optimize it.
             if nextItinerary is not None:
-                optimizedRoutesList.append(self.__optimize(nextItinerary))
+                optimizedRoutesList.append([nextItinerary[0],
+                                            nextItinerary[1],
+                                            nextItinerary[2],
+                                            nextItinerary[3],
+                                            nextItinerary[4],
+                                            nextItinerary[5], '->'])
+                optimizedRoutesList[i].extend(self.__optimize(nextItinerary))
             else:
                 #If EOF is reached, no more itineraries left to process.
                 break
             
-        #print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
+        print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
         return optimizedRoutesList #Return all optimized itineraries.
     
     
@@ -106,7 +112,7 @@ class ItineraryOptimizer:
                 cheapestPermutation = [homeDestination, permutation[0],
                                         permutation[1], permutation[2],
                                          permutation[3], homeDestination,
-                                          lowestCost]
+                                          round(lowestCost,2)]
                 
         #Lowest costing permutation with it's cost
         return cheapestPermutation

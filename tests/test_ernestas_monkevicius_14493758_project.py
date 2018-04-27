@@ -117,9 +117,9 @@ class Test(unittest.TestCase):
     
     def test_itineraryOptimizer(self):
         io = ItineraryOptimizer(self.filesDict)
-        self.assertTrue(io.getOptimizedItinerary(1) == [['LUP', 'AGM', 'MRV', 'YPO', 'EKI', 'LUP', 15166.05498]])
-        self.assertTrue(io.getOptimizedItinerary(1) == [['MAM', 'NBX', 'BXR', 'GDN', 'ERS', 'MAM', 2508.7659795]])
-        self.assertTrue(io.getOptimizedItinerary(1) == [['OLA', 'MNZ', 'OLT', 'ELU', 'EGR', 'OLA', 10087.174878]])
+        self.assertTrue(io.getOptimizedItinerary(1) == [['LUP','EKI','YPO','MRV','AGM','A321','->','LUP', 'AGM', 'MRV', 'YPO', 'EKI', 'LUP', 15166.05498]])
+        self.assertTrue(io.getOptimizedItinerary(1) == [['MAM','BXR','ERS','GDN','NBX','747','->','MAM', 'NBX', 'BXR', 'GDN', 'ERS', 'MAM', 2508.7659795]])
+        self.assertTrue(io.getOptimizedItinerary(1) == [['OLA','OLT','ELU','EGR','MNZ','767','->','OLA', 'MNZ', 'OLT', 'ELU', 'EGR', 'OLA', 10087.174878]])
         self.assertTrue(io.getOptimizedItinerary(3) != None)
         self.assertTrue(len(io.getOptimizedItinerary()) == 34) 
         

@@ -8,6 +8,9 @@ import pandas as pd
 from ernestas_monkevicius_14493758_project.utility import cleanUp
 import traceback
 import sys
+import warnings
+
+warnings.simplefilter(action='ignore', category=UserWarning)
 
 class Graph:
     '''Models the graph data structure.'''

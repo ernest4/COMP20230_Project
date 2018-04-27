@@ -49,7 +49,8 @@ def main(argv=None):
     optimizedItineraries = itineraryOptimizer.getOptimizedItinerary()
     
     #Output optimized itineraries to .csv using pandas
-    pd.DataFrame(optimizedItineraries).to_csv(inputFileOptionsDict['outputFile'], header=False, index=False)
+    #pd.DataFrame(optimizedItineraries).dropna().to_csv(inputFileOptionsDict['outputFile'], header=False, index=True)
+    pd.DataFrame(optimizedItineraries).to_csv(inputFileOptionsDict['outputFile'], header=False, index=True)
     
     endTime = time.time()
     print("Finished in:", (endTime-startTime),'seconds.')
