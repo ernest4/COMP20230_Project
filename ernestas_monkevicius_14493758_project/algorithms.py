@@ -15,9 +15,6 @@ class ItineraryOptimizer:
     Takes in itineraries and supporting files and produces the best route for
     the itinerary, via exhaustive brute force evaluation.
     '''
-    
-    #Global variable for the class. Contains the cached information for a cost of a leg.
-    airportLegCostCacheDict = {}
 
     def __init__(self, files):
         '''
