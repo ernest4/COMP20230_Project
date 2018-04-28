@@ -58,13 +58,13 @@ class ItineraryOptimizer:
                                             nextItinerary[2],
                                             nextItinerary[3],
                                             nextItinerary[4],
-                                            nextItinerary[5], '->'])
+                                            nextItinerary[5],
+                                            '->'])
                 optimizedRoutesList[i].extend(self.__optimize(nextItinerary))
             else:
                 #If EOF is reached, no more itineraries left to process.
                 break
             
-        #print('getOptimizedItinerary: Final',optimizedRoutesList) #TESTING
         return optimizedRoutesList #Return all optimized itineraries.
     
     
@@ -72,7 +72,7 @@ class ItineraryOptimizer:
         '''
         __optimize(destinationList : list) -> (cheapestPermutation : list)
         
-        Returns a cheapest permuation with it's cost.
+        Returns a cheapest permutation with it's cost.
         '''
         
         #print("Optimizing itinerary:", destinationList)
@@ -80,7 +80,6 @@ class ItineraryOptimizer:
         aircraft = self.__aircraft.getAircraft(destinationList[-1])
         if aircraft is None: #No valid aircraft found
             return [] #No valid aircraft provided means no flight plan made
-            #aircraft = ['A321', 12000.0] #HARDCODED PLANE WITH LONEGEST RANGE, MAKE DYNAMIC !
             
         homeDestination = destinationList[0]
         destinationListPermutations = self.__permute(destinationList)
@@ -104,7 +103,7 @@ class ItineraryOptimizer:
                 continue #try the next permutation...
             elif cost == -1:
                 #Indicates that one of the airport codes or currencies is invalid
-                #and/or missing, this route list is not possible, abort the search.
+                #and/or missing, this route is not possible, abort the search.
                 return []
                 
             if cost < lowestCost: #If all is good an valid, keep track of the best permutation.

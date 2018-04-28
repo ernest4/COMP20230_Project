@@ -53,7 +53,7 @@ def main(argv=None):
     pd.DataFrame(optimizedItineraries).to_csv(inputFileOptionsDict['outputFile'], header=False, index=True)
     
     endTime = time.time()
-    print("Finished in:", (endTime-startTime),'seconds.')
+    print("Finished in:", round((endTime-startTime),4),'seconds.')
     print("Solutions in:",inputFileOptionsDict['outputFile'])
     
 if __name__ == "__main__":
