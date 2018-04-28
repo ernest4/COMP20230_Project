@@ -50,6 +50,7 @@ class ItineraryOptimizer:
             
             #If we successfully got an itinerary, optimize it.
             if nextItinerary is not None:
+                #Append the original itinerary information
                 optimizedRoutesList.append([nextItinerary[0],
                                             nextItinerary[1],
                                             nextItinerary[2],
@@ -57,6 +58,7 @@ class ItineraryOptimizer:
                                             nextItinerary[4],
                                             nextItinerary[5],
                                             '->'])
+                #Append the optimized information
                 optimizedRoutesList[i].extend(self.__optimize(nextItinerary))
             else:
                 #If EOF is reached, no more itineraries left to process.
@@ -86,8 +88,8 @@ class ItineraryOptimizer:
         
         cheapestPermutation = []
         for permutation in destinationListPermutations: 
-            #Attach home and first destination to the end of each permutation
-            #and find the total cost of the permutation.
+            #Attach home airport and first destination to the end of each
+            #permutation and find the total cost of the permutation.
             # [A1,A2,A3,A4] -> [A1,A2,A3,A4,A0,A1]
             
             permutation.extend([homeDestination, permutation[0]])
@@ -103,7 +105,8 @@ class ItineraryOptimizer:
                 #and/or missing, this route is not possible, abort the search.
                 return []
                 
-            if cost < lowestCost: #If all is good an valid, keep track of the best permutation.
+            #If all is good an valid, keep track of the best permutation.
+            if cost < lowestCost:
                 lowestCost = cost #Keep track of the lowest.
                 cheapestPermutation = [homeDestination, permutation[0],
                                         permutation[1], permutation[2],
@@ -134,7 +137,8 @@ class ItineraryOptimizer:
         '''
         
         aircraftRange = aircraft[1]
-        airportList = self.__airports.getAirports(destinationPermutation) #get airport information for each of the codes.
+        #get airport information for each of the codes.
+        airportList = self.__airports.getAirports(destinationPermutation)
         #e.g. 'OLT' -> ['United States', 'OLT', 32.7552, -117.1995]
         
         #If one of the airport codes is invalid, return prematurely.
@@ -144,18 +148,18 @@ class ItineraryOptimizer:
         
         total = 0
         for i in range(0, len(airportList)-1):
-            fromAirport = airportList[i][0]
-            toAirport = airportList[i+1][0]
+            startAirportCoord = airportList[i][2:5]
+            destinationAirportCoord = airportList[i+1][2:5]
+            destinationAirportName = airportList[i+1][0]
             
-            #If no cached value is found, compute the distance between start
-            #airport and destination airport
-            distance = coordDist(airportList[i][2:5], airportList[i+1][2:5])
+            #Compute the distance between start airport and destination airport
+            distance = coordDist(startAirportCoord, destinationAirportCoord)
             
             #if any leg is longer than aircraft range, this permutation can't be flown.
             if distance > aircraftRange:
                 return None
             
-            exchangeRate = self.__currency.getExchangeRate(toAirport)
+            exchangeRate = self.__currency.getExchangeRate(destinationAirportName)
             if exchangeRate is not None:
                 #Update the total cost
                 total += distance*exchangeRate
