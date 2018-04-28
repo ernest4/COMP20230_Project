@@ -109,6 +109,12 @@ class Airport:
         self.__airportsDict = self.__df_airport.set_index('IATA').T.to_dict('list')
         
     def getAirports(self, codes):
+        '''
+        getAirports(codes : list) -> list of lists
+        
+        output format: [['Afghanistan', 'KBL', 34.565853000000004, 69.212328]]
+        '''
+        
         if type(codes) != type([]) and type(codes) != type(tuple()):
             raise Exception('codes argument must be a list')
         
