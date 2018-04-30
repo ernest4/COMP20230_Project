@@ -2,18 +2,26 @@
 Ernestas_Monkevicius_14493758_Project
 =====================================
 
+Term project for COMP20230. Finds out optimal route for a list of input airports and a given aircraft.
 
+Prerequisites
+----------------------
 
-Term project for COMP20230. Finds out optimal route for a list of input airports.
+This project was created in a Python 3.6 environment.
 
-* pip install https://github.com/ernest4/COMP20230_Project.git
+Instalation and Setup
+----------------------
+* pip install git+https://github.com/ernest4/COMP20230_Project.git
+* pip install -r requirements.txt
 * From terminal, run the following command to learn usage:
     
   comp20230_project -h
 
+* Quickstart:
+
+  comp20230_project -i inputRoutesFile.csv
 
 * Free software: GNU General Public License v3
-
 
 Features
 --------
