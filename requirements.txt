@@ -3,7 +3,7 @@ arrow==0.12.1
 asn1crypto==0.24.0
 attrs==17.4.0
 awsebcli==3.12.4
-Babel==2.5.3
+Babel==2.9.1
 beautifulsoup4==4.6.0
 binaryornot==0.4.4
 bleach==2.1.2
